@@ -1,3 +1,4 @@
+# Thermal Model 
 # Objective funtion
 
 def Net_Present_Cost(model): # OBJETIVE FUNTION: MINIMIZE THE NPC FOR THE SISTEM
@@ -10,7 +11,7 @@ def Net_Present_Cost(model): # OBJETIVE FUNTION: MINIMIZE THE NPC FOR THE SISTEM
       
     return (sum(model.Scenario_Net_Present_Cost[i]*model.Scenario_Weight[i] for i in model.scenario ))
            
-##################################################### PV constraints##################################################
+############################################## PV constraints ##################################################
 
 def Solar_Energy(model,i, t): # Energy output of the solar panels
     '''
@@ -21,8 +22,20 @@ def Solar_Energy(model,i, t): # Energy output of the solar panels
     '''
     return model.Total_Energy_PV[i,t] == model.PV_Energy_Production[i,t]*model.Inverter_Efficiency*model.PV_Units
 
+###################################################### SC constraints ######################################
 
-#################################################### Battery constraints #############################################
+def Solar_Thermal_Energy (model,i,t,c): # Energy output of solar collectors
+
+    '''
+    This constraint calculates the energy produced by the solar collectors 
+    for each scenario considering all the users for each class.
+    
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.Total_Energy_SC [i,t,c] == model.SC_Energy_Production[i,t,c]*model.SC_Units
+
+
+############################################## Battery constraints #############################################
 
 def State_of_Charge(model,i, t): # State of Charge of the battery
     '''
@@ -94,18 +107,154 @@ def Max_Bat_out(model,i, t): #minimun flow of energy for the discharge fase
     '''
     return model.Energy_Battery_Flow_Out[i,t] <= model.Maximun_Discharge_Power*model.Delta_Time
 
+####################################################### TANK constraints ####################################
+
+def Tank_Thermal_Energy (model,i,t,c): 
+    '''
+    This constraint calculates the total energy flow out by the tank of each class and scenario.
+    
+    :param model: Pyomo model as defined in the Model Creation library
+    '''
+    return model.Total_Energy_Tank_Flow_Out [i,t,c] == model.Energy_Tank_Flow_Out [i,t,c]*model.Tank_Units 
+
+def Energy_Tank (model,i,t,c): # Tank Energy balance
+    '''
+     This constraint calculates the state of the thermal charge of the tank
+     for each period of analysis and for each class of users. It is the energy
+     balance on the water storage tank unit in each period. The Energy_Tank 
+     in the period 't' is equal to the Energy_Tank in period 't-1' plus the energy
+     flow into the tank, minus the energy flow out of the tank. This is done for each
+     class and scenario i. In time t=1 the Energy_Tank is equal to a fully charged tank.
+
+     :param model: Pyomo model as defined in the Model_creation library.
+     '''
+if t==1: # Energy_Tank  for the period 0 is equal to the Tank size.
+        return model.Energy_Tank[i,t,c] == model.Tank_Nominal_Capacity*1 + model.Total_Energy_SC [i,t,c] + model.Nominal_Power_Resistance[i,t,c]* model.Electric_Resistance_Efficiency - model.Energy_Tank_Flow_Out[i,t,c] - model.Enviromental_Losses [i,t,c] - model.Thermal_Energy_Curtailment [i,t,c]
+
+if t>1:  
+        return model.Energy_Tank [i,t,c] == model.Energy_Tank[i,t-1,c] + model.Total_Energy_SC[i,t,c] + model.Nominal_Power_Resistance[i,t,c]* model.Electric_Resistance_Efficiency - model.Energy_Tank_Flow_Out[i,t,c] - model.Environmental_Losses [i,t,c] - model.Thermal_Energy_Curtailment [i,t,c]
+
+def Tank_Nominal_Capacity(model):
+    
+    ''' 
+    This constraint calculates the nominal capacity of the tank considering
+    the maximum and the minimum temperature allowed in the tank
+
+    :param model: Pyomo model as defined in the Model_creation library
+    '''
+        return model.Tank_Nominal_Capacity == model.Mass_Liquid* model.Specific_Heat*(model.Tank_Maximum_Temperature - model.Tank_Minumum_Temperature)
+
+def Maximun_Tank_Charge(model,i,t,c): # Maximun state of charge of the Tank in terms of thermal energy
+    '''
+    This constraint keeps the state of charge of the tank equal or under the 
+    size of the tank for each scenario i and each class c.
+    
+    :param model: Pyomo model as defined in the Model_creation library.    
+    '''
+    return model.Energy_Tank[i,t,c] <= model.Tank_Nominal_Capacity
+
+def Environmental_Thermal_(model,i,t,c):
+    '''
+    This constraint calucaltes the the envirnmental losses for each tank in each class c and scenario i.
+
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.Total_Environmental_Losses[i,t,c] == model.Enviromental_Losses*model.Tank_Units [i,t,c] 
+
+############################## Boiler constraints ############################
+
+def Boiler_Thermal_Energy(model,i,t,c):
+    '''
+    This constraint calculates the energy produced by the boiler considering 
+    the efficiency of the boiler for each class c and scenario i. 
+    
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+return model.Total_Boiler_Energy [i,t,c] == model.Boiler_Energy[i,t,c]* model.Boiler_Efficiency*model.Boiler_Units 
+
+
+def Maximun_Boiler_Energy(model,i,t,c): # Maximun energy output of the Boiler    
+    '''
+    This constraint ensures that the boiler will not exceed his nominal capacity 
+    in each period in each scenario i and class c.
+    
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.Boiler_Energy[i,t,c] <= model.Boiler_Nominal_Capacity*model.Delta_Time
+
+def NG_Comsuption(model,i,t,c): # NG comsuption 
+    '''
+    This constraint transforms the energy produce by the boiler generator in to 
+    kg of natural gas in each scenario i and class.
+    This is done using the low heating value
+    of the natural gas and the efficiency of the boiler.
+    
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.NG_Consume[i,t,c] == model.Boiler_Energy[i,t,c]/(model.Boiler_Efficiency*model.Low_Heating_Value_NG)
+
+################################### Electrical Resistance #####################################################
+
+def Resistance_Thermal_Energy (model,i,t,c):
+    '''
+    This constraint calculates the total thermal energy produced by the electrical resistance
+    for each class c and scenario i.
+
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.Total_Resistance_Energy [i,t,c] == model.Nominal_Power_Resistance[i,t,c]*model.Delta_Time*model.Electric_Resistance_Efficiency*model.Resistance_Units
+
+################################### Number Constraint #######################################################
+
+def Number_of_Tank (model):
+    '''
+    This constraint defines that the number of tank has to be equal to 
+    the resistance number for each class and scenario.
+    
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.Tank_Units == model.Resistance_Units
 
 
 ############################################## Energy Constraints ##################################################
 
-def Energy_balance(model, i, t): # Energy balance
-    '''
-    This constraint ensures the perfect match between the energy energy demand of the 
-    system and the differents sources to meet the energy demand each scenario i.
+def Total_Thermal_Energy_Demand (model,i,t,c):
+    ''' 
+    This constraint calculates the thermal energy demand for all the users in each classs c and for each scenario i. 
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''
-    return model.Energy_Demand[i,t] == model.Total_Energy_PV[i,t] + model.Generator_Energy[i,t] - model.Energy_Battery_Flow_In[i,t] + model.Energy_Battery_Flow_Out[i,t] + model.Lost_Load[i,t] - model.Energy_Curtailment[i,t]
+    return model.Total_Thermal_Energy_Demand[i,t,c] == model.Thermal_Energy_Demand[i,t,c]*model.Users_Number_Class
+
+def Thermal_Energy_Balance(model,i,t,c): # Thermal energy balance
+     '''
+     This costraint ensures the perfect match between the energy demand of the 
+     system and the different sources to meet the thermal energy demand for each class c 
+     and each scenario i
+
+     :param model: Pyomo model as defined in the Model_creation library.
+     '''
+     return  model.Total_Thermal_Energy_Demand[i,t,c] == model.Total_Energy_SC [i,t,c] + model.Total_Resistance_Energy [i,t,c] + model.Total_Boiler_Energy [i,t,c] - model.Total_Energy_Tank_Flow_Out[i,t,c] - model.Total_Environmental_Losses[i,t,c]- model.Thermal_Energy_Curtailment[i,t,c] 
+
+def model.Total_Electrical_Resistence_Demand (mdodel,i,t): # The summation of the electrical resistance demand of each class. 
+     '''
+     This Constraint define the electrical demand comes form the 
+     electrical resistance to satisfy the thermal demand. 
+     This term is involved in the electrical energy balance.
+
+     :param model: Pyomo model as defined in the Model_creation library.
+     '''
+     return model.Total_Electrical_Resistance_Demand[i,t] == sum(model.Total_Resistance_Energy[c] for c in model.classes
+
+def Energy_balance(model, i, t): # Energy balance
+    '''
+    This constraint ensures the perfect match between the energy energy demand of the 
+    system and the differents sources to meet the energy demand including 
+    the electric resistance demand of thermal part each scenario i.
+    
+    :param model: Pyomo model as defined in the Model_creation library.
+    '''
+    return model.Energy_Demand[i,t] == model.Total_Energy_PV[i,t] + model.Generator_Energy[i,t] - model.Energy_Battery_Flow_In[i,t] + model.Energy_Battery_Flow_Out[i,t] + model.Lost_Load[i,t] - model.Energy_Curtailment[i,t] - model.Total_Electrical_Resistance_Demand[i,t]
 
 def Maximun_Lost_Load(model,i): # Maximum permissible lost load
     '''
@@ -117,7 +266,7 @@ def Maximun_Lost_Load(model,i): # Maximum permissible lost load
     return model.Lost_Load_Probability >= (sum(model.Lost_Load[i,t] for t in model.periods)/sum(model.Energy_Demand[i,t] for t in model.periods))
 
 
-######################################## Diesel generator constraints ############################
+######################################## Diesel generator constraints #################################################################
 
 def Maximun_Diesel_Energy(model,i, t): # Maximun energy output of the diesel generator
     '''
@@ -137,11 +286,40 @@ def Diesel_Comsuption(model,i, t): # Diesel comsuption
     :param model: Pyomo model as defined in the Model_creation library.
     '''
     return model.Diesel_Consume[i,t] == model.Generator_Energy[i,t]/(model.Generator_Efficiency*model.Low_Heating_Value)
-
-
-   
+                                                                                                                                  
+                                                                 
+############################################## Economical Constraints ###################################################
     
-########################################### Economical Constraints ###################################################
+def SC_Financial_Cost(model,i,t):
+   '''
+   This constraint define the financial cost of the solar collector technology 
+   as the summation of each class that will be considered in the Financial Cost. 
+   In this way all costs of each class will be considered.
+
+   :param model: Pyomo model as defined in the Model_creation library.
+   '''
+   return model.SC_Financial_Cost [i,t] == sum(model.SC_Units[c]* model.SC_investment_Cost*model.SC_Nominal_Capacity[c] for c in model.classes)
+
+def Tank_Financial_Cost (model,i,t):
+   '''
+   This constraint define the financial cost of the tank technology 
+   as the summation of each class that will be considered in the Financial Cost.
+   In this way all costs of each class will be considered.
+
+   :param model: Pyomo model as defined in the Model_creation library.
+   '''
+   return model.Tank_Financial_Cost[i,t] == sum(model.Tank_Units[c]*model.Tank_Nominal_Capacity[c]*model.Tank_Invesment_Cost for c in model.classes)
+
+def Boiler_Financial_Cost (model,i,t):
+   ''' 
+   This constraint define the financial cost of the boiler technology 
+   as the summation of each class that will be considered in the Financial Cost.
+   In this way all costs of each class will be considered.
+
+   :param model: Pyomo model as defined in the Model_creation library.
+   '''
+   return model.Boiler_Financial_Cost [i,t] == sum(model.Boiler_Units[c]*model.Boiler_Invesment_Cost*model.Boiler_Invesment_Cost[c] for c in model.classes)
+
 
 def Financial_Cost(model): 
     '''
@@ -149,7 +327,7 @@ def Financial_Cost(model):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''
-    return model.Cost_Financial == ((model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost+model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost)*model.Porcentage_Funded*model.Interest_Rate_Loan)/(1-((1+model.Interest_Rate_Loan)**(-model.Years)))
+    return model.Cost_Financial == ((model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost+model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost + model.SC_Financial_Cost + model.Tank_Financial_Cost + model.Boiler_Financial_Cost)*model.Porcentage_Funded*model.Interest_Rate_Loan)/(1-((1+model.Interest_Rate_Loan)**(-model.Years)))
 
 def Diesel_Cost_Total(model,i):
     '''
@@ -182,15 +360,15 @@ def Initial_Inversion(model):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''    
-    return model.Initial_Inversion == (model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost + model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost )*(1-model.Porcentage_Funded) 
-
+    return model.Initial_Inversion == (model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost + model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost model.SC_Financial_Cost + model.Tank_Financial_Cost + model.Boiler_Financial_Cost )*(1-model.Porcentage_Funded) 
+                                                                 
 def Operation_Maintenance_Cost(model):
     '''
     This funtion calculate the operation and maintenance for the system. 
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''    
-    return model.Operation_Maintenance_Cost == sum(((model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity*model.Maintenance_Operation_Cost_PV + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost*model.Maintenance_Operation_Cost_Battery+model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost*model.Maintenance_Operation_Cost_Generator)/((1+model.Discount_Rate)**model.Project_Years[y])) for y in model.years) 
+return model.Operation_Maintenance_Cost == sum(((model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity*model.Maintenance_Operation_Cost_PV + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost*model.Maintenance_Operation_Cost_Battery+model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost*model.Maintenance_Operation_Cost_Generator + model.SC_Financial_Cost* sum(model.Maintenance_Operation_Cost_SC[c] for c in model.classes) + model.Tank_Financial_Cost*sum(model.Maintenance_Operation_Cost_Tank[c] for c in model.classes) + model.Boiler_Financial_Cost*sum(model.Maintenance_Operation_Cost_Boiler[c] for c in model.classes)))/((1+model.Discount_Rate)**model.Project_Years[y])) for y in model.years) 
 
 def Total_Finalcial_Cost(model):
     '''
