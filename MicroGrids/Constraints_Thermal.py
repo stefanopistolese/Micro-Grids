@@ -236,7 +236,7 @@ def Thermal_Energy_Balance(model,i,t,c): # Thermal energy balance
      '''
      return  model.Total_Thermal_Energy_Demand[i,t,c] == model.Total_Energy_SC [i,t,c] + model.Total_Resistance_Energy [i,t,c] + model.Total_Boiler_Energy [i,t,c] - model.Total_Energy_Tank_Flow_Out[i,t,c] - model.Total_Environmental_Losses[i,t,c]- model.Thermal_Energy_Curtailment[i,t,c] 
 
-def model.Total_Electrical_Resistence_Demand (mdodel,i,t): # The summation of the electrical resistance demand of each class. 
+def model.Total_Electrical_Resistance_Demand (model,i,t): # The summation of the electrical resistance demand of each class. 
      '''
      This constraint defines the electrical demand that comes from the 
      electrical resistance to satisfy the thermal demand. 
