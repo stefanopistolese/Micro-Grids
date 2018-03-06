@@ -23,13 +23,13 @@ def Model_Creation(model):
     model.Scenarios = Param() 
     
     # Classes Parameters
-    model.calsses = RangeSet(1, model.Classes) #Creation of a set from 1 to the number of classes of the thermal part
+    model.Classes = Param (within=NonNegative) #Creation of a set from 1 to the number of classes of the thermal part
     
     #SETS
     model.periods = RangeSet(1, model.Periods) # Creation of a set from 1 to the number of periods in each year
     model.years = RangeSet(1, model.Years) # Creation of a set from 1 to the number of years of the project
     model.scenario = RangeSet(1, model.Scenarios) # Creation of a set from 1 to the numbero scenarios to analized
-    model.calsses = RangeSet(1, model.Classes) # Creation of a set from 1 to the number of classes of the thermal part
+    model.classes = RangeSet(1, model.Classes) # Creation of a set from 1 to the number of classes of the thermal part
     
     # PARAMETERS
     
@@ -123,8 +123,7 @@ def Model_Creation(model):
     model.Total_Energy_Tank_Flow_Out = Var(model.scenario, model.periods, model.classes, within=NonNegativeReals) # Total Tank discharge in Wh
     model.Energy_Tank_Flow_Out = Var(model.scenario, model.periods, model.classes, within=NonNegativeReals)# Tank unit discharge energy in Wh
     model.Energy_Tank_Flow_In = Var(model.scenario, model.periods,  model.classes,within=NonNegativeReals) # Battery charge energy in wh
-    model.Energy_Tank = Var(model.scenario, model.periods, model.classes, within=NonNegativeReals) # State of Charge of the Tank in wh
-    model.Environmental_Loss_Units = Var(model.classes,within=NonNegativeReals) # Number of Environmental Losses per tank
+    model.SOC_Tank = Var(model.scenario, model.periods, model.classes, within=NonNegativeReals) # State of Charge of the Tank in wh
     model.Total_Environmental_Losses = Var (model.classes,within=NonNegativeReals) # Total Environmental Losses per class
 
     # Variables associated to the diesel generator
@@ -156,7 +155,11 @@ def Model_Creation(model):
     model.Thermal_Energy_Curtailment = Var(model.scenario, model.periods, model.classes, within=NonNegativeReals)
     model.Total_Thermal_Energy_Demand = Var(model.scenario, model.periods, model.classes, within=NonNegativeReals) # This is the thermal demand considering all the users in that class
 
-
+    # Variables associated to the financial costs
+    model.SC_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of SC technology considering all the classes
+    model.Tank_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of Tank technology considering all the classes (he investment tank costs include the resistance cost)
+    model.Boiler_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of Boiler technology considering all the classes
+    
     # Variables associated to the project
     model.Cost_Financial = Var(within=NonNegativeReals) # Financial cost of each period in USD
     model.Scenario_Net_Present_Cost = Var(model.scenario, within=NonNegativeReals) ####
