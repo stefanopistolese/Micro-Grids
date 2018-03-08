@@ -145,6 +145,94 @@ def Load_results1(instance):
     
     return Time_Series
     
+def Load_Thermal_Results1(instance):
+    
+    Number_Scenarios = int(instance.Scenarios.extract_values()[None])
+    Number_Classes = int(instance.Classes.extract_values()[None])
+    Number_Periods = int(instance.Periods.extract_values()[None])
+
+    colonne=[]
+    
+    for k in range (1,Number_Scenarios+1):
+        colonne.append('Scenarios_'+str(k))
+
+    columns= []
+
+    for i in range (1,Number_Classes+1):
+        columns.append('Classes_'+str(i))
+   
+    Scenarios_Classes_Periods = [[] for i in range (Number_Classes*Number_Scenarios)]
+
+    Scenarios_Classes=pd.DataFrame()
+    
+    SC_Energy = instance.Total_Energy_SC.get_values()
+    Tank_Flow_Out = instance.Total_Energy_Tank_Flow_Out.get_values()
+    Thermal_Curtailment = instance.Thermal_Energy_Curtailment.get_values()
+    Thermal_Energy_Demand = instance.Total_Thermal_Energy_Demand.get_values() # sostituito extract_values con get_values
+    SOC_Tank = instance.SOC_Tank.get_values()
+    Boiler_Energy = instance.Total_Boiler_Energy.get_values()
+    NaturalGas = instance.NG_consume.get_values()
+
+    for k in range (0,Number_Scenarios):
+        for i in range(0,Number_Classes):
+            for j in range(1, Number_Periods+1):
+                Scenarios_Classes_Periods[Number_Classes*k+i].append((k+1,i+1,j))
+
+    foo=0     
+    for k in colonne:
+        for i in columns:
+            Information = [[] for i in range(7)]
+            for j in  Scenarios_Classes_Periods[foo]:
+                Information[0].append(SC_Energy[j])
+                Information[1].append(Tank_Flow_Out[j])
+                Information[2].append(Thermal_Curtailment[j])
+                Information[3].append(Thermal_Energy_Demand[j])
+                Information[4].append(SOC_Tank[j])
+                Information[5].append(Boiler_Energy[j])
+                Information[6].append(NaturalGas[j])
+                
+                
+                Scenarios_Classes=Scenarios_Classes.append(Information)
+                foo+=1
+                
+        index=[]  
+        for i in range (1,Number_Scenarios+1):
+            for j in range(1, Number_Classes+1):   
+                index.append('SC_Energy '+str(i)+','+str(j))
+                index.append('Tank_Flow_Out '+str(i)+','+str(j))
+                index.append('Thermal_Curtailment '+str(i)+','+str(j))
+                index.append('Thermal_Energy_Demand '+str(i)+','+str(j))
+                index.append('SOC_Tank '+str(i)+','+str(j))
+                index.append('Boiler_Energy '+str(i)+','+str(j))
+                index.append('NaturalGas '+str(i)+','+str(j))
+                
+                
+        Scenarios_Classes.index= index
+                        
+
+     # Creation of an index starting in the 'model.StartDate' value with a frequency step equal to 'model.Delta_Time'
+    if instance.Delta_Time() >= 1 and type(instance.Delta_Time()) == type(1.0) : # if the step is in hours and minutes
+        foo = str(instance.Delta_Time()) # trasform the number into a string
+        hour = foo[0] # Extract the first character
+        minutes = str(int(float(foo[1:3])*60)) # Extrac the last two character
+        columns = pd.DatetimeIndex(start=instance.StartDate(), 
+                                   periods=instance.Periods(), 
+                                   freq=(hour + 'h'+ minutes + 'min')) # Creation of an index with a start date and a frequency
+    elif instance.Delta_Time() >= 1 and type(instance.Delta_Time()) == type(1): # if the step is in hours
+        columns = pd.DatetimeIndex(start=instance.StartDate(), 
+                                   periods=instance.Periods(), 
+                                   freq=(str(instance.Delta_Time()) + 'h')) # Creation of an index with a start date and a frequency
+    else: # if the step is in minutes
+        columns = pd.DatetimeIndex(start=instance.StartDate(), 
+                                   periods=instance.Periods(), 
+                                   freq=(str(int(instance.Delta_Time()*60)) + 'min'))# Creation of an index with a start date and a frequency
+        
+        Scenarios_Classes.columns=columns
+        Scenarios_Classes=Scenarios_Classes.transpose()
+        
+        Scenarios_Classes.to_excel('Results/Time_Series_Thermal.xls') # Creating an excel file with the values of the variables that are in function of the periods
+
+    return Scenarios_Classes
 
     
     
