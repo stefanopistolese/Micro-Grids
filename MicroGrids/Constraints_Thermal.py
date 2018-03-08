@@ -128,10 +128,10 @@ def State_Of_Charge_Tank (model,i,t,c): # State of Charge (SOC) of the thermal s
 
      :param model: Pyomo model as defined in the Model_creation library.
      '''
-if t==1: # SOC_Tank  for the period 0 is equal to the Tank size.
+    if t==1: # SOC_Tank  for the period 0 is equal to the Tank size.
         return model.SOC_Tank[i,t,c] == model.Tank_Nominal_Capacity*1 + model.Total_Energy_SC [i,t,c]/model.Users_Number_Class[i,t,c] + model.Nominal_Power_Resistance[i,t,c]* model.Electric_Resistance_Efficiency - model.Energy_Tank_Flow_Out[i,t,c] - model.Environmental_Losses [i,t,c]
 
-if t>1:  
+    if t>1:  
         return model.SOC_Tank [i,t,c] == model.SOC_Tank[i,t-1,c] + model.Total_Energy_SC[i,t,c]/model.Users_Number_Class[i,t,c] + model.Nominal_Power_Resistance[i,t,c]* model.Electric_Resistance_Efficiency - model.Energy_Tank_Flow_Out[i,t,c] - model.Environmental_Losses [i,t,c]
 
 def Tank_Nominal_Capacity(model):
@@ -170,7 +170,7 @@ def Boiler_Thermal_Energy(model,i,t,c):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''
-return model.Total_Boiler_Energy [i,t,c] == model.Boiler_Energy[i,t,c]* model.Boiler_Efficiency*model.Boiler_Units 
+    return model.Total_Boiler_Energy [i,t,c] == model.Boiler_Energy[i,t,c]* model.Boiler_Efficiency*model.Boiler_Units 
 
 
 def Maximun_Boiler_Energy(model,i,t,c): # Maximun energy output of the Boiler    
@@ -236,7 +236,7 @@ def Thermal_Energy_Balance(model,i,t,c): # Thermal energy balance
      '''
      return  model.Total_Thermal_Energy_Demand[i,t,c] == model.Total_Energy_SC [i,t,c] + model.Total_Resistance_Energy [i,t,c] + model.Total_Boiler_Energy [i,t,c] - model.Total_Energy_Tank_Flow_Out[i,t,c] - model.Total_Environmental_Losses[i,t,c]- model.Thermal_Energy_Curtailment[i,t,c] 
 
-def model.Total_Electrical_Resistance_Demand (model,i,t): # The summation of the electrical resistance demand of each class. 
+def Total_Electrical_Resistance_Demand (model,i,t): # The summation of the electrical resistance demand of each class. 
      '''
      This constraint defines the electrical demand that comes from the 
      electrical resistance to satisfy the thermal demand. 
@@ -369,7 +369,7 @@ def Initial_Inversion(model):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''    
-    return model.Initial_Inversion == (model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost + model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost model.SC_Financial_Cost + model.Tank_Financial_Cost + model.Boiler_Financial_Cost )*(1-model.Porcentage_Funded) 
+    return model.Initial_Inversion == (model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost + model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost + model.SC_Financial_Cost + model.Tank_Financial_Cost + model.Boiler_Financial_Cost )*(1-model.Porcentage_Funded) 
                                                                  
 def Operation_Maintenance_Cost(model):
     '''
@@ -377,7 +377,7 @@ def Operation_Maintenance_Cost(model):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''    
-return model.Operation_Maintenance_Cost == sum(((model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity*model.Maintenance_Operation_Cost_PV + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost*model.Maintenance_Operation_Cost_Battery+model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost*model.Maintenance_Operation_Cost_Generator + model.SC_Financial_Cost* sum(model.Maintenance_Operation_Cost_SC[c] for c in model.classes) + model.Tank_Financial_Cost*sum(model.Maintenance_Operation_Cost_Tank[c] for c in model.classes) + model.Boiler_Financial_Cost*sum(model.Maintenance_Operation_Cost_Boiler[c] for c in model.classes)))/((1+model.Discount_Rate)**model.Project_Years[y])) for y in model.years) 
+    return model.Operation_Maintenance_Cost == sum(((model.PV_Units*model.PV_invesment_Cost*model.PV_Nominal_Capacity*model.Maintenance_Operation_Cost_PV + model.Battery_Nominal_Capacity*model.Battery_Invesment_Cost*model.Maintenance_Operation_Cost_Battery+model.Generator_Nominal_Capacity*model.Generator_Invesment_Cost*model.Maintenance_Operation_Cost_Generator + model.SC_Financial_Cost*(sum(model.Maintenance_Operation_Cost_SC[c] for c in model.classes) + model.Tank_Financial_Cost*sum(model.Maintenance_Operation_Cost_Tank[c] for c in model.classes) + model.Boiler_Financial_Cost*sum(model.Maintenance_Operation_Cost_Boiler[c] for c in model.classes)))/((1+model.Discount_Rate)**model.Project_Years[y])) for y in model.years) 
 
 def Total_Finalcial_Cost(model):
     '''
