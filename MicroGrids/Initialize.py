@@ -25,6 +25,20 @@ def Initialize_Demand(model, i, t):
     '''
     return float(Energy_Demand[i][t])
 
+Thermal_Energy_Demand = pd.read_excel('Example/Thermal_Demand.xls') # open the energy thermal demand file
+
+def Initialize_Thermal_Demand(model, i, c, t):
+    '''
+    This function returns the value of the thermal energy demand from a system for each period and classes of analysis from a excel file.
+    
+    :param model: Pyomo model as defined in the Model_Creation script.
+        
+    :return: The energy demand for the period t.     
+        
+    '''
+    
+    return float(Thermal_Energy_Demand [i] [c] [t])
+
 PV_Energy = pd.read_excel('Example/PV_Energy.xls') # open the PV energy yield file
 
 def Initialize_PV_Energy(model, i, t):
@@ -37,6 +51,19 @@ def Initialize_PV_Energy(model, i, t):
     :return: The energy yield of one PV for the period t.
     '''
     return float(PV_Energy[i][t])
+
+SC_Energy = pd.read_excel('Example/SC_Energy.xls') # # open the SC energy yield file
+
+def Initialize_SC_Energy(model, i, c, t):
+    '''
+    This function returns the value of the energy yield by one SC under the characteristics of the system 
+    analysis for each period of analysis from a excel file.
+    
+    :param model: Pyomo model as defined in the Model_Creation script.
+    
+    :return: The energy yield of one SC for the class c in the period t.
+    '''
+    return float(SC_Energy[i][c][t])
 
 def Initialize_Demand_Dispatch(model, t):
     '''
