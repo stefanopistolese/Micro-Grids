@@ -3,11 +3,10 @@
 import pandas as pd
 from pyomo.environ import  AbstractModel
 
-from Results import Plot_Energy_Total, Load_results1, Load_results2, Load_results1_binary, Load_results2_binary, Percentage_Of_Use, Energy_Flow, Energy_Participation, LDR, Load_results1_Integer, Load_results2_Integer, Load_results1_Dispatch, Load_results2_Dispatch 
-from Model_Creation import Model_Creation, Model_Creation_binary, Model_Creation_Integer, Model_Creation_Dispatch
-from Model_Resolution import Model_Resolution, Model_Resolution_binary, Model_Resolution_Integer, Model_Resolution_Dispatch
+from Results_Thermal import Plot_Energy_Total, Load_results1, Load_results2, Load_Thermal_Results1, Load_results1_binary, Load_results2_binary, Percentage_Of_Use, Energy_Flow, Energy_Participation, LDR, Load_results1_Integer, Load_results2_Integer 
+from Model_Creation_Thermal import Model_Creation, Model_Creation_binary, Model_Creation_Integer
+from Model_Resolution_Thermal import Model_Resolution, Model_Resolution_binary, Model_Resolution_Integer
 from Economical_Analysis import Levelized_Cost_Of_Energy
-
 
 # Type of problem formulation:
 formulation = 'Dispatch'
@@ -19,7 +18,8 @@ if formulation == 'LP':
     Model_Creation(model) # Creation of the Sets, parameters and variables.
     instance = Model_Resolution(model) # Resolution of the instance
     ## Upload the resulst from the instance and saving it in excel files
-    Time_Series = Load_results1(instance) # Extract the results of energy from the instance and save it in a excel file 
+    Time_Series,Scenarios = Load_results1(instance) # Extract the results of energy from the instance and save it in a excel file 
+    Scenarios_Classes = Load_Thermal_Results1(instance)
     Results = Load_results2(instance) # Save results into a excel file
 elif formulation == 'Binary':
     Model_Creation_binary(model) # Creation of the Sets, parameters and variables.
