@@ -1,6 +1,6 @@
 
 from pyomo.environ import  Param, RangeSet, NonNegativeReals, Var
-from Initialize import Initialize_years, Initialize_Demand, Initialize_PV_Energy # Import library with initialitation funtions for the parameters
+from Initialize import Initialize_years, Initialize_Demand, Initialize_PV_Energy, Initilize_SC_Energy, Iinitialize_Thermal_Demand  # Import library with initialitation funtions for the parameters
 
 ## Thermal Model ##
 
@@ -23,7 +23,7 @@ def Model_Creation(model):
     model.Scenarios = Param() 
     
     # Classes Parameters
-    model.Classes = Param (within=NonNegative) #Creation of a set from 1 to the number of classes of the thermal part
+    model.Classes = Param (within=NonNegativeReals) #Creation of a set from 1 to the number of classes of the thermal part
     
     #SETS
     model.periods = RangeSet(1, model.Periods) # Creation of a set from 1 to the number of periods in each year
@@ -41,7 +41,7 @@ def Model_Creation(model):
     
     # Parameters of the SC (Solare Collectors)
     model.SC_Nominal_Capacity = Param(within=NonNegativeReals) #Nominal capacity of the Solar Collectors
-    model.SC_investment_Cost = Param(within=NonNEgativeReals) # Cost of SC pannel in USD/W
+    model.SC_investment_Cost = Param(within=NonNegativeReals) # Cost of SC pannel in USD/W
     model.SC_Energy_Production = Param (model.scenario, model.periods, model.classes, within=NonNegativeReals, initialize=Initilize_SC_Energy)
 
     
@@ -83,7 +83,7 @@ def Model_Creation(model):
     model.Energy_Demand = Param(model.scenario, model.periods, initialize=Initialize_Demand) # Energy Energy_Demand in W 
     model.Lost_Load_Probability = Param(within=NonNegativeReals) # Lost load probability in %
     model.Value_Of_Lost_Load = Param(within=NonNegativeReals) # Value of lost load in USD/W
-    model.Thermal_Energy_Demand = Param (model.scenario, model.periods, model.classes, initialize=Iinitialize_Demand) # Thermal Energy Demand in W 
+    model.Thermal_Energy_Demand = Param (model.scenario, model.periods, model.classes, initialize=Iinitialize_Thermal_Demand) # Thermal Energy Demand in W 
     
     # Parameters of the proyect
     model.Delta_Time = Param(within=NonNegativeReals) # Time step in hours
