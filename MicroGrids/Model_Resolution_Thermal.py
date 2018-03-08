@@ -17,8 +17,8 @@ def Model_Resolution(model,datapath="Example/data.dat"):
     Maximun_Charge, Minimun_Charge, Max_Power_Battery_Charge, Max_Power_Battery_Discharge, Max_Bat_in, Max_Bat_out, \
     Financial_Cost, Energy_balance, Maximun_Lost_Load,Scenario_Net_Present_Cost, Scenario_Lost_Load_Cost, \
     Initial_Inversion, Operation_Maintenance_Cost, Total_Finalcial_Cost, Battery_Reposition_Cost, Maximun_Diesel_Energy, Diesel_Comsuption,Diesel_Cost_Total, \
-    Solar_Thermal_Energy, Tank_Thermal_Energy, State_Of_Charge_Tank, Tank_Nominal_Capacity, Maximun_Tank_Charge, Environmental_Thermal_Losses, Boiler_Thermal_Energy, Maximun_Boiler_Energy, \
-    NG_Comsuption, Resistance_Thermal_Energy, Number_of_Tank, Total_Thermal_Energy_Demand, Thermal_Energy_Balance, Total_Electrical_Resistance_Demand, SC_Financial_Cost, \
+    Solar_Thermal_Energy, Tank_Thermal_Energy, State_Of_Charge_Tank, Tank_Nominal_Capacity, Maximum_Tank_Charge, Environmental_Thermal_Losses, Boiler_Thermal_Energy, Maximum_Boiler_Energy, \
+    NG_Consumption, Resistance_Thermal_Energy, Number_of_Tank, Total_Thermal_Energy_Demand, Thermal_Energy_Balance, Total_Electrical_Resistance_Demand, SC_Financial_Cost, \
     Tank_Financial_Cost, Boiler_Financial_Cost ,NG_Cost_Total
     
     
