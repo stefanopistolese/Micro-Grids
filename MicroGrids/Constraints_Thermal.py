@@ -32,7 +32,7 @@ def Solar_Thermal_Energy (model,i,t,c): # Energy output of solar collectors
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''
-    return model.Total_Energy_SC [i,t,c] == model.SC_Energy_Production[i,t,c]*model.SC_Units
+    return model.Total_Energy_SC [i,t,c] == model.SC_Energy_Production[i,t,c]*model.SC_Units[c]
 
 
 ############################################## Battery constraints #############################################
@@ -115,7 +115,7 @@ def Tank_Thermal_Energy (model,i,t,c):
     
     :param model: Pyomo model as defined in the Model Creation library
     '''
-    return model.Total_Energy_Tank_Flow_Out [i,t,c] == model.Energy_Tank_Flow_Out [i,t,c]*model.Tank_Units 
+    return model.Total_Energy_Tank_Flow_Out [i,t,c] == model.Energy_Tank_Flow_Out [i,t,c]*model.Tank_Units[c]
 
 def State_Of_Charge_Tank (model,i,t,c): # State of Charge (SOC) of the thermal storage (Tank)
     '''
@@ -170,7 +170,7 @@ def Boiler_Thermal_Energy(model,i,t,c):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''
-    return model.Total_Boiler_Energy [i,t,c] == model.Boiler_Energy[i,t,c]* model.Boiler_Efficiency*model.Boiler_Units 
+    return model.Total_Boiler_Energy [i,t,c] == model.Boiler_Energy[i,t,c]* model.Boiler_Efficiency*model.Boiler_Units[c] 
 
 
 def Maximun_Boiler_Energy(model,i,t,c): # Maximun energy output of the Boiler    
@@ -202,7 +202,7 @@ def Resistance_Thermal_Energy (model,i,t,c):
 
     :param model: Pyomo model as defined in the Model_creation library.
     '''
-    return model.Total_Resistance_Energy [i,t,c] == model.Nominal_Power_Resistance[i,t,c]*model.Delta_Time*model.Electric_Resistance_Efficiency*model.Resistance_Units
+    return model.Total_Resistance_Energy [i,t,c] == model.Nominal_Power_Resistance[i,t,c]*model.Delta_Time*model.Electric_Resistance_Efficiency*model.Resistance_Units[c]
 
 ################################### Number Constraint #######################################################
 
@@ -244,7 +244,7 @@ def Total_Electrical_Resistance_Demand (model,i,t): # The summation of the elect
 
      :param model: Pyomo model as defined in the Model_creation library.
      '''
-     return model.Total_Electrical_Resistance_Demand[i,t] == sum(model.Total_Resistance_Energy[c] for c in model.classes)
+     return model.Total_Electrical_Resistance_Demand[i,t] == sum(model.Total_Resistance_Energy[i,c,t] for c in model.classes)
 
 def Energy_balance(model, i, t): # Energy balance
     '''
