@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,8 +8,6 @@ import matplotlib.patches as mpatches
 import matplotlib.lines as mlines
 import matplotlib.ticker as mtick
 import matplotlib.pylab as pylab
-
-
 
 def Load_results1(instance):
     '''
@@ -130,7 +129,7 @@ def Load_results1(instance):
     Scenario_Information.to_excel('Results/Scenario_Information.xls')
     
     S = instance.PlotScenario.value
-    Time_Series = pd.DataFrame(index=range(0,8760))
+    Time_Series = pd.DataFrame(index=range(0,35040))
     Time_Series.index = Scenarios.index
     
     Time_Series['Lost Load'] = Scenarios['Lost_Load '+str(S)]
@@ -143,8 +142,8 @@ def Load_results1(instance):
     Time_Series['Energy Diesel'] = Scenarios['Gen energy '+str(S)]
     Time_Series['Diesel'] = Scenarios['Diesel '+str(S)]    
     
-    return Time_Series
-    
+    return Time_Series,Scenarios
+
 def Load_Thermal_Results1(instance):
     
     Number_Scenarios = int(instance.Scenarios.extract_values()[None])
@@ -234,8 +233,6 @@ def Load_Thermal_Results1(instance):
 
     return Scenarios_Classes
 
-    
-    
 def Load_results2(instance):
     '''
     This function extracts the unidimensional variables into a  data frame and creates a excel file with it.
@@ -287,8 +284,6 @@ def Load_results2(instance):
     
     
     return Size_variables
-   
-    
     
 
 def Load_results1_binary(instance):
