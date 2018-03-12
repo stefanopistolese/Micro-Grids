@@ -4,12 +4,13 @@ import pandas as pd
 from pyomo.environ import  AbstractModel
 
 from Results_Thermal import Plot_Energy_Total, Load_results1, Load_results2, Load_Thermal_Results1, Load_results1_binary, Load_results2_binary, Percentage_Of_Use, Energy_Flow, Energy_Participation, LDR, Load_results1_Integer, Load_results2_Integer 
-from Model_Creation_Thermal import Model_Creation, Model_Creation_binary, Model_Creation_Integer
-from Model_Resolution_Thermal import Model_Resolution, Model_Resolution_binary, Model_Resolution_Integer
+from Model_Creation_Thermal import Model_Creation
+from Model_Resolution_Thermal import Model_Resolution
 from Economical_Analysis import Levelized_Cost_Of_Energy
 
+
 # Type of problem formulation:
-formulation = 'Dispatch'
+formulation='LP'
 
 model = AbstractModel() # define type of optimization problem
 
@@ -31,11 +32,7 @@ elif formulation =='Integer':
     instance = Model_Resolution_Integer(model)
     Time_Series = Load_results1_Integer(instance) # Extract the results of energy from the instance and save it in a excel file 
     Results = Load_results2_Integer(instance)
-elif formulation =='Dispatch':
-    Model_Creation_Dispatch(model)
-    instance = Model_Resolution_Dispatch(model)
-    Time_Series = Load_results1_Dispatch(instance) # Extract the results of energy from the instance and save it in a excel file 
-    Results = Load_results2_Dispatch(instance)
+
 
     
     
