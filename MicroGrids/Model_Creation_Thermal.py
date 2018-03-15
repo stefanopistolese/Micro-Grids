@@ -1,8 +1,4 @@
-
-from pyomo.environ import  Param, RangeSet, NonNegativeReals, Var
-from Initialize import Initialize_years, Initialize_Demand, Initialize_PV_Energy, Initilize_SC_Energy, Iinitialize_Thermal_Demand  # Import library with initialitation funtions for the parameters
-
-## Thermal Model ##
+# -*- coding: utf-8 -*-
 
 from pyomo.environ import  Param, RangeSet, NonNegativeReals, Var
 from Initialize_Thermal import Initialize_years, Initialize_Demand, Initialize_PV_Energy, Initialize_SC_Energy, Initialize_Thermal_Demand # Import library with initialitation funtions for the parameters
@@ -60,14 +56,8 @@ def Model_Creation(model):
     model.Battery_Invesment_Cost = Param(within=NonNegativeReals) # Cost of battery 
     
     # Parameters of the TANK storage 
-    model.Tank_Efficiency = Param() # Efficiency of the tank % 
-    model.Tank_Maximum_Temperature = Param(within=NonNegativeReals) # Maximum Temperature of the water allowed in the tank
-    model.Tank_Minumum_Temperature = Param(within=NonNegativeReals) # Minimum hot sanitary water temperature allowed to service   
-    model.Tank_Invesment_Cost = Param(within=NonNegativeReals) # Cost of unit Tank
-    model.Mass_Liquid = Param() # Mass of water 
-    model.Specific_Heat = Param() # Water specific heat
-    model.Environmental_Losses = Param (within=NonNegativeReals) # Energy lost due to the temperature difference between the tank and the external environment
-
+    model.Tank_Efficiency = Param() # Efficiency of the tank %   
+    model.Tank_Invesment_Cost = Param(within=NonNegativeReals) # Cost of unit Tank USD/W
     
     # Parametes of the diesel generator
     model.Generator_Efficiency = Param() # Generator efficiency to trasform heat into electricity %
@@ -83,7 +73,8 @@ def Model_Creation(model):
 
     # Parameters of the Electric Resistance  
     model.Electric_Resistance_Efficiency = Param() # Electric Resistance efficiency %
-       
+    model.Resistance_Invesment_Cost = Param(within=NonNegativeReals)
+    
     # Parameters of the Energy balance                  
     model.Energy_Demand = Param(model.scenario, model.periods, initialize=Initialize_Demand) # Energy Energy_Demand in W 
     model.Lost_Load_Probability = Param(within=NonNegativeReals) # Lost load probability in %
@@ -104,7 +95,8 @@ def Model_Creation(model):
     model.Maintenance_Operation_Cost_SC = Param(within=NonNegativeReals)    # Percentage of the total investment spend in operation and management of solar collectors in each period in %    
     model.Maintenance_Operation_Cost_Boiler = Param (within=NonNegativeReals) # Percentage of the total investment spend in operation and management of boiler in each period in %
     model.Maintenance_Operation_Cost_Tank = Param (within=NonNegativeReals)      # Percentage of the total investment spend in operation and management of tank in each period in %
-
+    model.Maintenance_Operation_Cost_Resistance = Param (within=NonNegativeReals) # Percentage of the total investment spend in operation and management of resistance in each period in %
+    
     # VARIABLES
     
     # Variables associated to the solar panels
@@ -122,14 +114,9 @@ def Model_Creation(model):
     model.Maximun_Discharge_Power = Var() #Maximun discharge power in w
     
     # Variables associated to the storage TANK
-
-    model.Tank_Units = Var(model.classes,within=NonNegativeReals) # Number of units of Tank 
-    model.Tank_Nominal_Capacity = Var(within=NonNegativeReals) # Capacity of the tank in Wh
-    model.Total_Energy_Tank_Flow_Out = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Total Tank discharge in Wh
+    model.Tank_Nominal_Capacity = Var(model.classes, within=NonNegativeReals) # Capacity of the tank in Wh
     model.Energy_Tank_Flow_Out = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals)# Tank unit discharge energy in Wh
-    model.Energy_Tank_Flow_In = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Battery charge energy in wh
     model.SOC_Tank = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # State of Charge of the Tank in wh
-    model.Total_Environmental_Losses = Var (model.scenario, model.classes, model.periods, within=NonNegativeReals) # Total Environmental Losses per class
 
     # Variables associated to the diesel generator
     model.Generator_Nominal_Capacity = Var(within=NonNegativeReals) # Capacity  of the diesel generator in Wh
@@ -137,21 +124,16 @@ def Model_Creation(model):
     model.Generator_Energy = Var(model.scenario, model.periods, within=NonNegativeReals) # Energy generated for the Diesel generator
     model.Diesel_Cost_Total = Var(model.scenario, within=NonNegativeReals)
     
-    ## Variables associated to the Boiler generator
-    model.Boiler_Units = Var(model.classes,within=NonNegativeReals) # Number of boiler units 
-    model.Boiler_Nominal_Capacity = Var (within=NonNegativeReals) # Capacity of the boiler in Wh
+    ## Variables associated to the Boiler 
+    model.Boiler_Nominal_Capacity = Var (model.classes, within=NonNegativeReals) # Capacity of the boiler in Wh
     model.NG_Consume = Var(model.scenario, model.classes, model.periods,within=NonNegativeReals) # Natural Gas consumed to produce thermal energy in Kg (considering Liquified Natural Gas)
     model.Boiler_Energy = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Energy generated by the boiler 
     model.NG_Cost_Total = Var(model.scenario, within=NonNegativeReals) 
-    model.Total_Boiler_Energy = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Thermal Energy produced by the boiler considering all the users in each class
-
     
     # Variables associated to the RESISTANCE
-    model.Resistance_Units = Var(model.classes,within=NonNegativeReals) #  Number of units of electrical Resistance
-    model.Nominal_Power_Resistance = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Electric Nominal power of the thermal resistance 
-    model.Total_Resistance_Energy = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Total Electric power considering all the users in each class
+    model.Nominal_Power_Resistance = Var(model.classes, within=NonNegativeReals) # Electric Nominal power of the thermal resistance 
+    model.Resistance_Thermal_Energy = Var(model.scenario, model.classes, model.periods, within=NonNegativeReals) # Total Electric power considering all the users in each class
     model.Total_Electrical_Resistance_Demand = Var(model.scenario,model.periods, within=NonNegativeReals) # Total Resistance Energy required by the electrical supply considered in the electric energy balance
-
     
     # Varialbles associated to the energy balance
     model.Lost_Load = Var(model.scenario, model.periods, within=NonNegativeReals) # Energy not suply by the system kWh
@@ -164,6 +146,7 @@ def Model_Creation(model):
     model.SC_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of SC technology considering all the classes
     model.Tank_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of Tank technology considering all the classes (he investment tank costs include the resistance cost)
     model.Boiler_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of Boiler technology considering all the classes
+    model.Resistance_Financial_Cost = Var(within=NonNegativeReals) # Financial cost of Boiler technology considering all the classes
     
     # Variables associated to the project
     model.Cost_Financial = Var(within=NonNegativeReals) # Financial cost of each period in USD
@@ -172,7 +155,6 @@ def Model_Creation(model):
     model.Operation_Maintenance_Cost = Var(within=NonNegativeReals)
     model.Total_Finalcial_Cost = Var(within=NonNegativeReals)
     model.Battery_Reposition_Cost = Var(within=NonNegativeReals)
-
 
 
 def Model_Creation_binary(model):
