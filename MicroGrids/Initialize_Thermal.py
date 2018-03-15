@@ -81,6 +81,7 @@ def Start_Cost(model):
 def Marginal_Cost_Generator(model):
     
     return (model.Marginal_Cost_Generator_1*model.Generator_Nominal_Capacity-model.Start_Cost_Generator)/model.Generator_Nominal_Capacity 
+
 def Max_Power_Battery_Charge(model): 
     '''
     This constraint calculates the Maximum power of charge of the battery. Taking in account the 
