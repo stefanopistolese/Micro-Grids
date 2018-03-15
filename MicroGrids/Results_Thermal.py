@@ -159,18 +159,18 @@ def Load_Thermal_Results1(instance):
 
     for i in range (1,Number_Classes+1):
         columns.append('Classes_'+str(i))
-   
-    Scenarios_Classes_Periods = [[] for i in range (Number_Classes*Number_Scenarios)]
 
     Scenarios_Classes=pd.DataFrame()
     
     SC_Energy = instance.Total_Energy_SC.get_values()
-    Tank_Flow_Out = instance.Total_Energy_Tank_Flow_Out.get_values()
+    Energy_Tank_Flow_Out = instance.Energy_Tank_Flow_Out.get_values()
     Thermal_Curtailment = instance.Thermal_Energy_Curtailment.get_values()
     Thermal_Energy_Demand = instance.Total_Thermal_Energy_Demand.get_values() # sostituito extract_values con get_values
     SOC_Tank = instance.SOC_Tank.get_values()
-    Boiler_Energy = instance.Total_Boiler_Energy.get_values()
-    NaturalGas = instance.NG_consume.get_values()
+    Boiler_Energy = instance.Boiler_Energy.get_values()
+    NaturalGas = instance.NG_Consume.get_values()
+    Resistance = instance.Resistance_Thermal_Energy.get_values()
+    Scenarios_Classes_Periods = [[] for i in range (Number_Classes*Number_Scenarios)]
 
     for k in range (0,Number_Scenarios):
         for i in range(0,Number_Classes):
@@ -180,19 +180,19 @@ def Load_Thermal_Results1(instance):
     foo=0     
     for k in colonne:
         for i in columns:
-            Information = [[] for i in range(7)]
+            Information = [[] for i in range(8)]
             for j in  Scenarios_Classes_Periods[foo]:
                 Information[0].append(SC_Energy[j])
-                Information[1].append(Tank_Flow_Out[j])
+                Information[1].append(Energy_Tank_Flow_Out[j])
                 Information[2].append(Thermal_Curtailment[j])
                 Information[3].append(Thermal_Energy_Demand[j])
                 Information[4].append(SOC_Tank[j])
                 Information[5].append(Boiler_Energy[j])
                 Information[6].append(NaturalGas[j])
+                Information[7].append(Resistance[j])
                 
-                
-                Scenarios_Classes=Scenarios_Classes.append(Information)
-                foo+=1
+            Scenarios_Classes=Scenarios_Classes.append(Information)
+            foo+=1
                 
         index=[]  
         for i in range (1,Number_Scenarios+1):
@@ -204,7 +204,7 @@ def Load_Thermal_Results1(instance):
                 index.append('SOC_Tank '+str(i)+','+str(j))
                 index.append('Boiler_Energy '+str(i)+','+str(j))
                 index.append('NaturalGas '+str(i)+','+str(j))
-                
+                index.append('Resistance '+str(i)+','+str(j))
                 
         Scenarios_Classes.index= index
                         
@@ -226,10 +226,10 @@ def Load_Thermal_Results1(instance):
                                    periods=instance.Periods(), 
                                    freq=(str(int(instance.Delta_Time()*60)) + 'min'))# Creation of an index with a start date and a frequency
         
-        Scenarios_Classes.columns=columns
-        Scenarios_Classes=Scenarios_Classes.transpose()
+    Scenarios_Classes.columns=columns
+    Scenarios_Classes=Scenarios_Classes.transpose()
         
-        Scenarios_Classes.to_excel('Results/Time_Series_Thermal.xls') # Creating an excel file with the values of the variables that are in function of the periods
+    Scenarios_Classes.to_excel('Results/Time_Series_Thermal.xlsx') # Creating an excel file with the values of the variables that are in function of the periods
 
     return Scenarios_Classes
 
