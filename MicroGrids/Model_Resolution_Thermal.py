@@ -18,9 +18,9 @@ def Model_Resolution(model,datapath="Example/data.dat"):
     Maximun_Charge, Minimun_Charge, Max_Power_Battery_Charge, Max_Power_Battery_Discharge, Max_Bat_in, Max_Bat_out, \
     Financial_Cost, Energy_balance, Maximun_Lost_Load,Scenario_Net_Present_Cost, Scenario_Lost_Load_Cost, \
     Initial_Inversion, Operation_Maintenance_Cost, Total_Finalcial_Cost, Battery_Reposition_Cost, Maximun_Diesel_Energy, Diesel_Comsuption,Diesel_Cost_Total, \
-    Solar_Thermal_Energy, Tank_Thermal_Energy, State_Of_Charge_Tank, Tank_Nominal_Capacity, Maximun_Tank_Charge, Environmental_Thermal_Losses, Boiler_Thermal_Energy, Maximum_Boiler_Energy, \
-    NG_Consumption, Resistance_Thermal_Energy, Number_of_Tank, Total_Thermal_Energy_Demand, Thermal_Energy_Balance, Total_Electrical_Resistance_Demand, SC_Financial_Cost, \
-    Tank_Financial_Cost, Boiler_Financial_Cost ,NG_Cost_Total
+    Solar_Thermal_Energy, State_Of_Charge_Tank, Maximun_Tank_Charge, Maximum_Boiler_Energy, \
+    NG_Consumption, Maximum_Resistance_Thermal_Energy, Total_Thermal_Energy_Demand, Thermal_Energy_Balance, Total_Electrical_Resistance_Demand, SC_Financial_Cost, \
+    Tank_Financial_Cost, Boiler_Financial_Cost , Resistance_Financial_Cost, NG_Cost_Total
     
     
     # OBJETIVE FUNTION:
@@ -51,23 +51,16 @@ def Model_Resolution(model,datapath="Example/data.dat"):
     model.Maxbatout = Constraint(model.scenario, model.periods, rule=Max_Bat_out) #minimun flow of energy for the discharge fase
 
     # Tank Constraints     
-    model.TankThermalEnergy = Constraint(model.scenario, model.classes, model.periods, rule=Tank_Thermal_Energy)
     model.StateOfChargeTank = Constraint(model.scenario, model.classes, model.periods, rule =State_Of_Charge_Tank)
-    model.TankNominalCapacity = Constraint(model.scenario, model.classes, model.periods, rule =Tank_Nominal_Capacity)
     model.MaximumTankCharge = Constraint(model.scenario, model.classes, model.periods, rule =Maximun_Tank_Charge)
-    model.EnvironmentalThermalLosses = Constraint(model.scenario, model.classes, model.periods, rule =Environmental_Thermal_Losses)
     
     # Boiler Constraints     
-    model.BoilerThermalEnergy = Constraint(model.scenario, model.classes, model.periods, rule =Boiler_Thermal_Energy)
     model.MaximumBoilerEnergy = Constraint(model.scenario, model.classes, model.periods, rule =Maximum_Boiler_Energy) 
     model.NGConsumption = Constraint(model.scenario, model.classes, model.periods, rule = NG_Consumption)
     model.NGCostTotal = Constraint(model.scenario, rule = NG_Cost_Total)
     
     # Electrical Resistance Constraint     
-    model.ResistanceThermalEnergy = Constraint(model.scenario, model.classes, model.periods, rule =Resistance_Thermal_Energy)
-     
-    # Number Constraints      
-    model.NumberOfTank = Constraint(model.classes, rule =Number_of_Tank) 
+    model.MaximumResistanceThermalEnergy = Constraint(model.scenario, model.classes, model.periods, rule = Maximum_Resistance_Thermal_Energy)
     
     # Diesel Generator constraints
     model.MaximunDieselEnergy = Constraint(model.scenario, model.periods, rule=Maximun_Diesel_Energy) # Maximun energy output of the diesel generator
@@ -78,6 +71,7 @@ def Model_Resolution(model,datapath="Example/data.dat"):
     model.SCFinancialCost = Constraint(rule = SC_Financial_Cost ) 
     model.TankFinancialCost = Constraint(rule = Tank_Financial_Cost ) 
     model.BoilerFinancialCost = Constraint(rule =Boiler_Financial_Cost )
+    model.ResistanceFinancialCost = Constraint(rule = Resistance_Financial_Cost )
     model.FinancialCost = Constraint(rule=Financial_Cost) # Financial cost
     model.ScenarioNetPresentCost = Constraint(model.scenario, rule=Scenario_Net_Present_Cost)    
     model.InitialInversion = Constraint(rule=Initial_Inversion)
