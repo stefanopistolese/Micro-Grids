@@ -1,6 +1,14 @@
 # Thermal Model 
 # Objective funtion
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Mar  7 16:41:38 2018
 
+@author: pisto
+"""
+
+# Thermal Model 
+# Objective funtion
 
 def Net_Present_Cost(model): # OBJETIVE FUNTION: MINIMIZE THE NPC FOR THE SISTEM
     '''
@@ -365,7 +373,6 @@ def Scenario_Net_Present_Cost(model, i):
     
     :param model: Pyomo model as defined in the Model_creation library.
     '''            
-    return model.Scenario_Net_Present_Cost[i] == model.Initial_Inversion + model.Operation_Maintenance_Cost + model.Total_Finalcial_Cost + model.Battery_Reposition_Cost + model.Scenario_Lost_Load_Cost[i] + model.Diesel_Cost_Total[i]
+    return model.Scenario_Net_Present_Cost[i] == model.Initial_Inversion + model.Operation_Maintenance_Cost + model.Total_Finalcial_Cost + model.Battery_Reposition_Cost + model.Scenario_Lost_Load_Cost[i] + model.Diesel_Cost_Total[i] + model.NG_Cost_Total[i]
                 
-    
     
